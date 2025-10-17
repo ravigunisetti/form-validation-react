@@ -1,84 +1,89 @@
 import React, { useState } from "react";
 import "./App.css";
 
-function App() {
+export default function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
-  const validateEmail = (email) => {
-    // Simple regex for email validation
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(email);
-  };
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const passwordIsValid = password.length >= 8; // password rule: minimum 8 chars
 
-  const handleEmailChange = (event) => {
-    const emailValue = event.target.value;
-    setEmail(emailValue);
+  const formIsValid = emailIsValid && passwordIsValid;
 
-    if (!validateEmail(emailValue)) {
-      setEmailError("Please enter a valid email address.");
-    } else {
-      setEmailError("");
-    }
-  };
+  function handleSubmit(e) {
+    e.preventDefault();
+    setEmailTouched(true);
+    setPasswordTouched(true);
 
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-  };
+    if (!formIsValid) return;
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    alert("Form Submitted Successfully");
-  };
-
-  const validateForm = () => {
-    if (emailError || !email || !password) {
-      setIsFormValid(false);
-    } else {
-      setIsFormValid(true);
-    }
-  };
-
-  // Validate form when email or password changes
-  React.useEffect(() => {
-    validateForm();
-  }, [email, password, emailError]);
+    // success behaviour (replace with real submit logic)
+    alert("Form submitted successfully!");
+    setEmail("");
+    setPassword("");
+    setEmailTouched(false);
+    setPasswordTouched(false);
+  }
 
   return (
-    <div className="App">
-      <h1>Form Validation in React</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={handleEmailChange}
-            placeholder="Enter your email"
-          />
-          {emailError && <div className="error-message">{emailError}</div>}
-        </div>
+    <div className="app">
+      <form className="card" onSubmit={handleSubmit} noValidate>
+        <h1 className="title">Sign in</h1>
 
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={handlePasswordChange}
-            placeholder="Enter your password"
-          />
-        </div>
+        <label htmlFor="email" className="label">
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          className={`input ${emailTouched && !emailIsValid ? "invalid" : ""}`}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onBlur={() => setEmailTouched(true)}
+          aria-invalid={emailTouched && !emailIsValid}
+          aria-describedby="email-error"
+          placeholder="you@example.com"
+        />
+        {/* show error message below the input if email is invalid */}
+        {emailTouched && !emailIsValid && (
+          <div id="email-error" className="error">
+            Please enter a valid email address.
+          </div>
+        )}
 
-        <button type="submit" disabled={!isFormValid}>
+        <label htmlFor="password" className="label">
+          Password
+        </label>
+        <input
+          id="password"
+          type="password"
+          className={`input ${
+            passwordTouched && !passwordIsValid ? "invalid" : ""
+          }`}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onBlur={() => setPasswordTouched(true)}
+          aria-invalid={passwordTouched && !passwordIsValid}
+          aria-describedby="password-error"
+          placeholder="At least 8 characters"
+        />
+        {passwordTouched && !passwordIsValid && (
+          <div id="password-error" className="error">
+            Password must be at least 8 characters.
+          </div>
+        )}
+
+        <button
+          type="submit"
+          className="submit"
+          disabled={!formIsValid}
+          aria-disabled={!formIsValid}
+        >
           Submit
         </button>
       </form>
     </div>
   );
 }
-
-export default App;
